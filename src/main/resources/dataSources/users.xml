@@ -3,8 +3,9 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans 
 	http://www.springframework.org/schema/beans/spring-beans.xsd">
-	
-	<import resource="classpath:daoInterfaces/JDBCDataSource.xml"/>
-	<import resource="classpath:dataSources/users.xml"/>
+
+	<bean id="newUserDao" class="com.fullerton.edu.cpsc.cpsc476.dao.JDBCNewUserDao">
+			<property name="dataSource" ref="jdbcDataSource"/>
+	</bean>
 	
 </beans>

@@ -23,7 +23,7 @@ public class LoginServlet extends HttpServlet {
 	 *      response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-		ShowErrorPageUtil.redirectToErrorPage(request, response, ErrorAndMessages.inforCompromised);
+		ShowErrorPageUtil.redirectToErrorPage(request, response, ErrorAndMessages.INFORCOMPROMISED);
 	}
 
 	/**
@@ -37,13 +37,13 @@ public class LoginServlet extends HttpServlet {
 		if (request.getParameter("loginName") != "" && request.getParameter("loginName") != null) {
 			userName = request.getParameter("loginName");
 		} else {
-			ShowErrorPageUtil.redirectToErrorPage(request, response, "signUp.jsp", ErrorAndMessages.usernameNull);
+			ShowErrorPageUtil.redirectToErrorPage(request, response, "signUp.jsp", ErrorAndMessages.USERNAMENULL);
 			return;
 		}
 		if (request.getParameter("loginPwd") != "" && request.getParameter("loginPwd") != null) {
 			password = request.getParameter("loginPwd");
 		} else {
-			ShowErrorPageUtil.redirectToErrorPage(request, response, "signUp.jsp", ErrorAndMessages.passwordNull);
+			ShowErrorPageUtil.redirectToErrorPage(request, response, "signUp.jsp", ErrorAndMessages.PASSWORDNULL);
 			return;
 		}
 		if (checkLoginCredentials(password)) {
@@ -61,7 +61,7 @@ public class LoginServlet extends HttpServlet {
 			}
 		} else {
 			ShowErrorPageUtil.redirectToErrorPage(request, response, "signUp.jsp",
-					ErrorAndMessages.loginCredentialMisMatch);
+					ErrorAndMessages.LOGINCREDENTIALMISMATCH);
 			return;
 		}
 	}

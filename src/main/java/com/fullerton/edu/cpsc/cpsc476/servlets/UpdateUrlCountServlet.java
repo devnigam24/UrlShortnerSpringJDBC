@@ -32,7 +32,7 @@ public class UpdateUrlCountServlet extends HttpServlet {
 					shortUrl = request.getParameter("urlClicked");
 				} else {
 					ShowErrorPageUtil.redirectToErrorPage(request, response, "welcome.jsp",
-							ErrorAndMessages.serverDown);
+							ErrorAndMessages.SERVERDOWN);
 					return;
 				}
 				/*if (userObject.getUrlShornerMap().containsValue(shortUrl)) {

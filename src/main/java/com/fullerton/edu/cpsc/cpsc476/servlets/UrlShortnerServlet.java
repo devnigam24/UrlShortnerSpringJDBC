@@ -35,7 +35,7 @@ public class UrlShortnerServlet extends HttpServlet {
 		if (pageName == null || pageName == "")
 			pageName = "welcome.jsp";
 		if (longUrl.length() <= 0) {
-			ShowErrorPageUtil.redirectToErrorPage(request, response, pageName, ErrorAndMessages.urlNullMessage);
+			ShowErrorPageUtil.redirectToErrorPage(request, response, pageName, ErrorAndMessages.URLNULLMESSAGE);
 			return;
 		}
 		/*for (String oneUrl : userObject.getUrlShornerMap().keySet()) {

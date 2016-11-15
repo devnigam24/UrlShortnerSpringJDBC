@@ -14,7 +14,7 @@ public class LogOut extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		HttpSession thisSession = request.getSession();
 		thisSession.invalidate();
-		ShowErrorPageUtil.redirectToErrorPage(request, response, "signUp.jsp", ErrorAndMessages.logoutMessage);
+		ShowErrorPageUtil.redirectToErrorPage(request, response, "signUp.jsp", ErrorAndMessages.LOGOUTMESSAGE);
 		return;
 	}
 
