@@ -13,7 +13,7 @@
 	if (thisUser == null || thisUser.getUsername().equals(null) || thisUser.getUsername().equals("")) {
 		session.invalidate();
 		ShowErrorPageUtil.redirectToErrorPage(request, response, "signUp.jsp",
-				ErrorAndMessages.privatePageAccessError);
+				ErrorAndMessages.PRIVATEPAGEACCESSERROR);
 		return;
 	} else {
 		userName = thisUser.getUsername();

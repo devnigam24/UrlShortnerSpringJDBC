@@ -14,7 +14,7 @@ public class JDBCNewUserDao implements NewUserInterface{
 	
 	public void setDataSource(DataSource dataSource){
 		this.dataSource=dataSource;
-		this.jdbctemplate = new JdbcTemplate();
+		this.jdbctemplate = new JdbcTemplate(this.dataSource);
 	}
 
 	public boolean inserNewUserInDB(NewUserDetails newUser) {
@@ -22,6 +22,7 @@ public class JDBCNewUserDao implements NewUserInterface{
 			String CRATENEWUSER = "insert into AllUsersTable (USERNAME,PASSWORD,EMAILID) values "
 					+ "("+newUser.getUsername()+","+newUser.getPassword()+","+newUser.getEmailID()+")"; 
 			jdbctemplate.update(CRATENEWUSER);
+			//jdbctemplate.execute(CRATENEWUSER);
 			return Boolean.TRUE;
 		}catch(Exception e){
 			e.printStackTrace();

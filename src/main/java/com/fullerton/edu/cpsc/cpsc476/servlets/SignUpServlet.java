@@ -62,7 +62,7 @@ public class SignUpServlet extends HttpServlet {
 				NewUserDetails newUser = new NewUserDetails(username, email, password,false);
 				HttpSession session = req.getSession();
 				session.setAttribute("userInsession", newUser);
-				ApplicationContext context = new ClassPathXmlApplicationContext("users.xml");
+				ApplicationContext context = new ClassPathXmlApplicationContext("dataSources/users.xml");
 				JDBCNewUserDao dao = (JDBCNewUserDao)context.getBean("newUserDao");
 				if(dao.inserNewUserInDB(newUser)){
 					req.getRequestDispatcher("welcome.jsp").forward(req, res);
