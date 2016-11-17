@@ -1,0 +1,244 @@
+<?xml version="1.0" ?>
+
+<!--
+    HSQLDB database server
+
+    Install Ant
+
+    Place this build.xml in a directory by itself
+    (e.g. C:\hsqldb or $HOME/hsqldb)
+
+    Change to that directory and run
+
+        ant -projecthelp
+
+    to see the available targets
+
+    Note: you will need an Internet connection to download dependencies
+    the first time you run this script
+
+-->
+
+<project name="hsqldb" default="init"
+         xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+
+    <property name="maven.version" value="2.1.3" />
+    <property name="maven.jar"
+              value="maven-ant-tasks-${maven.version}.jar" />
+    <property name="maven.url"
+              value="http://search.maven.org/remotecontent?filepath=org/apache/maven/maven-ant-tasks/${maven.version}/${maven.jar}" />
+
+    <property name="hsqldb.version" value="2.3.4" />
+    <property name="sqltool.jar" value="sqltool-${hsqldb.version}.jar" />
+    <property name="hsqldb.jar" value="hsqldb-${hsqldb.version}.jar" />
+
+    <target name="check-maven-available">
+        <available file="antlib/${maven.jar}" property="maven.available" />
+    </target>
+
+    <target name="bootstrap-maven"
+            depends="check-maven-available"
+            unless="maven.available">
+        <mkdir dir="antlib" />
+        <mkdir dir="lib" />
+        <get dest="antlib/${maven.jar}"
+             usetimestamp="true"
+             skipexisting="true"
+             src="${maven.url}" />
+    </target>
+
+    <target name="resolve-dependencies" depends="bootstrap-maven">
+        <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
+                 uri="antlib:org.apache.maven.artifact.ant"
+                 classpath="antlib/${maven.jar}" />
+        <artifact:dependencies filesetId="dependency.fileset">
+            <dependency groupId="org.hsqldb"
+                        artifactId="hsqldb"
+                        version="${hsqldb.version}" />
+            <dependency groupId="org.hsqldb"
+                        artifactId="sqltool"
+                        version="${hsqldb.version}" />
+        </artifact:dependencies>
+        <copy todir="lib">
+            <fileset refid="dependency.fileset" />
+            <mapper type="flatten" />
+        </copy>
+    </target>
+
+    <target name="check-sqltool-rc-available">
+        <available file="etc/sqltool.rc"
+                   property="sqltool.rc.available" />
+    </target>
+
+    <target name="bootstrap-sqltool-rc"
+            depends="check-sqltool-rc-available"
+            unless="sqltool.rc.available">
+        <echo file="etc/sqltool.rc">
+urlid cpsc476
+url jdbc:hsqldb:hsql://localhost/cpsc476;ifexists=true
+username SA
+password Passw0rd
+
+urlid create
+url jdbc:hsqldb:file:data/cpsc476;create=true
+username SA
+password Passw0rd
+
+</echo>
+    </target>
+
+    <target name="check-db-exists">
+        <available file="data" type="dir" property="db.exists" />
+    </target>
+
+    <target name="init"
+            depends="resolve-dependencies, bootstrap-sqltool-rc, check-db-exists"
+            unless="db.exists"
+            description="Create HSQLDB database">
+        <mkdir dir="data" />
+        <java classname="org.hsqldb.cmdline.SqlTool"
+              classpath="lib/${sqltool.jar}"
+              failonerror="true">
+            <arg value="--rcFile" />
+            <arg value="etc/sqltool.rc" />
+            <arg value="--sql" />
+            <arg value="" />
+            <arg value="create" />
+        </java>
+    </target>
+
+    <target name="check-server-properties-available">
+        <available file="etc/server.properties"
+                   property="server.properties.available" />
+    </target>
+
+    <target name="bootstrap-server-properties"
+            depends="check-server-properties-available"
+            unless="server.properties.available">
+        <echo file="etc/server.properties">
+server.database.0=file:../data/cpsc476;ifexists=true
+server.dbname.0=cpsc476
+server.silent=false
+</echo>
+    </target>
+
+    <target name="start"
+            depends="init, bootstrap-server-properties"
+            description="Start HSQLDB server">
+        <java classname="org.hsqldb.server.Server"
+              classpath="lib/${hsqldb.jar}"
+              dir="etc"
+              fork="true"
+              spawn="true" />
+        <echo message="HSQLDB started" />
+    </target>
+
+    <target name="check-stopped"
+            depends="check-stopped-ok, check-stopped-error" />
+
+    <target name="check-stop-conditions">
+        <condition property="result.ok">
+            <equals arg1="${stop.result}" arg2="0" />
+        </condition>
+        <condition property="result.already-stopped">
+            <equals arg1="${stop.result}" arg2="7" />
+        </condition>
+        <condition property="stopped.ok">
+            <or>
+                <isset property="result.ok" />
+                <isset property="result.already-stopped" />
+            </or>
+        </condition>
+    </target>
+
+    <target name="check-stopped-ok"
+            depends="check-stop-conditions"
+            if="stopped.ok">
+        <echo message="HSQLDB stopped" />
+    </target>
+
+    <target name="check-stopped-error"
+            depends="check-stop-conditions"
+            unless="stopped.ok">
+        <echo message="Error stopping HSQLDB" />
+    </target>
+
+    <target name="stop-server">
+        <java classname="org.hsqldb.cmdline.SqlTool"
+              classpath="lib/${sqltool.jar}"
+              outputproperty="stop.output"
+              resultproperty="stop.result">
+            <arg value="--rcFile" />
+            <arg value="etc/sqltool.rc" />
+            <arg value="--sql" />
+            <arg value="SHUTDOWN SCRIPT;" />
+            <arg value="cpsc476" />
+        </java>
+    </target>
+
+    <target name="stop"
+            depends="init, stop-server, check-stopped"
+            description="Stop HSQLDB server" />
+
+    <target name="test-connection">
+        <java classname="org.hsqldb.cmdline.SqlTool"
+              classpath="lib/${sqltool.jar}"
+              outputproperty="check.output"
+              resultproperty="check.result">
+            <arg value="--rcFile" />
+            <arg value="etc/sqltool.rc" />
+            <arg value="--sql" />
+            <arg value="SELECT implementation_info_name, character_value
+                        FROM information_schema.sql_implementation_info
+                        WHERE implementation_info_name
+                            IN ('DBMS NAME', 'DBMS VERSION';" />
+            <arg value="cpsc476" />
+        </java>
+    </target>
+
+    <target name="check-connection"
+            depends="check-connection-ok, check-connection-error" />
+
+    <target name="check-connection-conditions">
+        <condition property="connection.ok">
+            <equals arg1="${check.result}" arg2="3" />
+        </condition>
+    </target>
+
+    <target name="check-connection-ok"
+            depends="check-connection-conditions"
+            if="connection.ok">
+        <echo message="HSQLDB is running" />
+    </target>
+
+    <target name="check-connection-error"
+            depends="check-connection-conditions"
+            unless="connection.ok">
+        <echo message="HSQLDB is not running" />
+    </target>
+
+    <target name="status"
+            depends="init, test-connection, check-connection"
+            description="Check if HSQLDB server is running" />
+
+    <target name="clean"
+            depends="stop"
+            description="Delete HSQLDB database">
+        <delete dir="data" />
+    </target>
+
+    <target name="manage"
+            depends="start"
+            description="Start HSQLDB Database Manager GUI">
+        <java classname="org.hsqldb.util.DatabaseManagerSwing"
+              classpath="lib/${hsqldb.jar}"
+              fork="true"
+              spawn="true">
+            <arg value="--rcFile" />
+            <arg value="etc/sqltool.rc" />
+            <arg value="--urlid" />
+            <arg value="cpsc476" />
+        </java>
+    </target>
+
+</project>

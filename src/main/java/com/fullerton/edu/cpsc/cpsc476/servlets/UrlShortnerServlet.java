@@ -26,7 +26,7 @@ public class UrlShortnerServlet extends HttpServlet {
 		NewUserDetails userObject;
 		userObject = (NewUserDetails) thisSession.getAttribute("userInsession");
 		if (userObject == null) {
-			userObject = new NewUserDetails("GuestUser", "Guest Email Id", "", true);
+			userObject = new NewUserDetails("GuestUser", "Guest@guest.com", "noPassword", true);
 		}
 		
 		String longUrl = request.getParameter("longUrl");

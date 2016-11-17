@@ -1,0 +1,11 @@
+
+urlid cpsc476
+url jdbc:hsqldb:hsql://localhost/cpsc476;ifexists=true
+username SA
+password Passw0rd
+
+urlid create
+url jdbc:hsqldb:file:data/cpsc476;create=true
+username SA
+password Passw0rd
+

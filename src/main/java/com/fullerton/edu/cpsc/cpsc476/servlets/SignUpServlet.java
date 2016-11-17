@@ -64,13 +64,18 @@ public class SignUpServlet extends HttpServlet {
 				session.setAttribute("userInsession", newUser);
 				ApplicationContext context = new ClassPathXmlApplicationContext("dataSources/users.xml");
 				JDBCNewUserDao dao = (JDBCNewUserDao)context.getBean("newUserDao");
-				if(dao.inserNewUserInDB(newUser)){
-					req.getRequestDispatcher("welcome.jsp").forward(req, res);
-				}else{
-					ShowErrorPageUtil.redirectToErrorPage(req, res, "signUp.jsp", 
-														ErrorAndMessages.DATABASEDOWNNOTRANSACTIONHAPPENED);
+				if(null == dao.inserNewUserInDB(newUser,req,res)){
 					return;
+				}else{
+					if(dao.inserNewUserInDB(newUser,req,res)){
+						req.getRequestDispatcher("welcome.jsp").forward(req, res);
+					}else{
+						ShowErrorPageUtil.redirectToErrorPage(req, res, "signUp.jsp", 
+								ErrorAndMessages.DATABASEDOWNNOTRANSACTIONHAPPENED);	
+						return;
+					}
 				}
+				
 			} catch (ServletException e) {
 				ShowErrorPageUtil.redirectToErrorPage(req, res,"");
 				return;
