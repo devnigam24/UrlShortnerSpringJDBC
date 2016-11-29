@@ -1,5 +1,6 @@
-<%@ page import="java.util.HashMap"%>
+<%@ page import="java.util.ArrayList"%>
 <%@ page import="java.util.Iterator"%>
+<%@ page import="com.fullerton.edu.cpsc.cpsc476.pojo.URL"%>
 <html>
 <head>
 <%@include file="includes/assets.jsp"%>
@@ -18,9 +19,8 @@
 	} else {
 		userName = thisUser.getUsername();
 	}
-	HashMap UrlMap = (HashMap) request.getAttribute("UserUrls");
-	HashMap UrlCountsMap = (HashMap) request.getAttribute("userUrlsCount");
-	Iterator<String> url = UrlMap.keySet().iterator();
+	ArrayList<URL> UrlMap = (ArrayList) request.getAttribute("URLlist");
+	Iterator<URL> url = UrlMap.iterator();
 %>
 </head>
 <body>
@@ -38,13 +38,12 @@
 		<tbody>
 			<%
 				while (url.hasNext()) {
-					String key = (String) url.next();
+					URL key = (URL)url.next();
 			%>
 			<tr>
-				<td><%=key%></td>
-				<td><%=UrlMap.get(key)%></td>
-				<%Integer hitsCount = (Integer)UrlCountsMap.get(UrlMap.get(key)); %>
-				<td><%if(hitsCount == null){hitsCount = 0;}%><%=hitsCount%></td>
+				<td><%=key.getLongName()%></td>
+				<td><%=key.getShortName()%></td>				
+				<td><%=key.getHits()%></td>				
 				<%
 					}
 				%>

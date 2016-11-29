@@ -3,6 +3,8 @@ package com.fullerton.edu.cpsc.cpsc476.Util;
 public class ErrorAndMessages {
 
 	public static String COLLECTIONEXISTS = "This Username Already exists in the database";
+	
+	public static String URLSHORTNERUNAVAILABLE = "500 Internal Server Error!!! UrlShortning Service unavailable";
 
 	public static String SERVERDOWN = "500 Internal Server Error!!! Please try again!!!";
 
@@ -15,8 +17,6 @@ public class ErrorAndMessages {
 	public static String USERNAMENULL = "Username cannot be null";
 
 	public static String PASSWORDNULL = "Password cannot be null";
-
-	public static String EMAILNULL = "Email cannot be null";
 
 	public static String LOGOUTMESSAGE = "You have been Logged out successfully";
 

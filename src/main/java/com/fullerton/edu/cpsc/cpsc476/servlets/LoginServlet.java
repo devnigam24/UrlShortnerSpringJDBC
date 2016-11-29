@@ -8,8 +8,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 import com.fullerton.edu.cpsc.cpsc476.Util.ErrorAndMessages;
 import com.fullerton.edu.cpsc.cpsc476.Util.ShowErrorPageUtil;
+import com.fullerton.edu.cpsc.cpsc476.dao.JDBCNewUserDao;
 import com.fullerton.edu.cpsc.cpsc476.pojo.NewUserDetails;
 
 /**
@@ -23,7 +27,7 @@ public class LoginServlet extends HttpServlet {
 	 *      response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-		ShowErrorPageUtil.redirectToErrorPage(request, response, ErrorAndMessages.INFORCOMPROMISED);
+		this.doPost(request, response);
 	}
 
 	/**
@@ -46,11 +50,12 @@ public class LoginServlet extends HttpServlet {
 			ShowErrorPageUtil.redirectToErrorPage(request, response, "signUp.jsp", ErrorAndMessages.PASSWORDNULL);
 			return;
 		}
-		if (checkLoginCredentials(password)) {
+		if (checkLoginCredentials(userName,password)) {
 			try {
 				HttpSession thisSession = request.getSession();
-				NewUserDetails newUser = new NewUserDetails(userName, "abc@xyz.com", password, false);
+				NewUserDetails newUser = this.getUserData(userName);
 				thisSession.setAttribute("userInsession", newUser);
+				request.setAttribute("MessagesInfo", "Log in Successfull");
 				request.getRequestDispatcher("welcome.jsp").forward(request, response);
 			} catch (ServletException e) {
 				ShowErrorPageUtil.redirectToErrorPage(request, response, e.getMessage());
@@ -66,11 +71,16 @@ public class LoginServlet extends HttpServlet {
 		}
 	}
 
-	private Boolean checkLoginCredentials(String password) {
-		if (password.equals("CorrectPassword"))
-			return true;
-		else
-			return false;
+	private NewUserDetails getUserData(String userName) {
+		ApplicationContext context = new ClassPathXmlApplicationContext("dataSources/users.xml");
+		JDBCNewUserDao dao = (JDBCNewUserDao)context.getBean("newUserDao");
+		return dao.getUserInfo(userName);
+	}
+
+	private Boolean checkLoginCredentials(String username, String password) {
+		ApplicationContext context = new ClassPathXmlApplicationContext("dataSources/users.xml");
+		JDBCNewUserDao dao = (JDBCNewUserDao)context.getBean("newUserDao");
+		return dao.authenticateThisUser(username,password);
 	}
 
 }

@@ -21,27 +21,19 @@ public class SignUpServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	public void doGet(HttpServletRequest req, HttpServletResponse res) {
-		ShowErrorPageUtil.redirectToErrorPage(req, res, ErrorAndMessages.INFORCOMPROMISED);
+		this.doPost(req, res);
 	}
 
 	public void doPost(HttpServletRequest req, HttpServletResponse res) {
 		String username = "";
 		String password = "";
 		String confirm = "";
-		String email = "";
 
 		if (req.getParameter("username") != null && req.getParameter("username") != "") {
 			username = req.getParameter("username");
 			req.setAttribute("username", username);
 		} else {
 			ShowErrorPageUtil.redirectToErrorPage(req, res, "signUp.jsp", ErrorAndMessages.USERNAMENULL);
-			return;
-		}
-		if (req.getParameter("email") != null && req.getParameter("email") != "") {
-			email = req.getParameter("email");
-			req.setAttribute("email", email);
-		} else {
-			ShowErrorPageUtil.redirectToErrorPage(req, res, "signUp.jsp", ErrorAndMessages.EMAILNULL);
 			return;
 		}
 		if (req.getParameter("password") != null && req.getParameter("password") != "") {
@@ -59,15 +51,17 @@ public class SignUpServlet extends HttpServlet {
 		}
 		if (password.equals(confirm)) {
 			try {
-				NewUserDetails newUser = new NewUserDetails(username, email, password,false);
+				NewUserDetails newUser = new NewUserDetails(username, password,false);
 				HttpSession session = req.getSession();
 				session.setAttribute("userInsession", newUser);
 				ApplicationContext context = new ClassPathXmlApplicationContext("dataSources/users.xml");
 				JDBCNewUserDao dao = (JDBCNewUserDao)context.getBean("newUserDao");
-				if(null == dao.inserNewUserInDB(newUser,req,res)){
+				Boolean isUserStored = dao.inserNewUserInDB(newUser,req,res);
+				if(null == isUserStored){
 					return;
 				}else{
-					if(dao.inserNewUserInDB(newUser,req,res)){
+					if(isUserStored){
+						req.setAttribute("MessagesInfo", "Sign Up Successfull");
 						req.getRequestDispatcher("welcome.jsp").forward(req, res);
 					}else{
 						ShowErrorPageUtil.redirectToErrorPage(req, res, "signUp.jsp", 

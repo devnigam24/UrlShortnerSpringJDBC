@@ -5,7 +5,6 @@
 <body>
 	<%
 		String username = (String) request.getAttribute("username");
-		String email = (String) request.getAttribute("email");
 		String errorMessage = (String) request.getAttribute("errorMessage");
 		String passwordDonotMatch = (String) request.getAttribute("passwordDonotMatch");
 	%>
@@ -30,15 +29,8 @@
 					</div>
 					<div class="row">
 						<div class="input-field col s6">
-							<input name="email" <%if (email == null) {%> value=""
-								<%} else {%> value=<%=email%> <%}%> id="email" type="email"
-								class="validate"> <label for="email">Email Id</label>
-						</div>
-					</div>
-					<div class="row">
-						<div class="input-field col s6">
 							<input id="password" name="password" type="password"
-								class="validate"> <label for="password">Has to be CorrectPassword</label>
+								class="validate"> <label for="password">Password</label>
 						</div>
 						<div class="col s4">
 							<%

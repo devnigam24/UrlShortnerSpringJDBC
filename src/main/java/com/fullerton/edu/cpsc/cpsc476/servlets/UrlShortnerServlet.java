@@ -9,8 +9,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 import com.fullerton.edu.cpsc.cpsc476.Util.ErrorAndMessages;
 import com.fullerton.edu.cpsc.cpsc476.Util.ShowErrorPageUtil;
+import com.fullerton.edu.cpsc.cpsc476.dao.JDBCNewUserDao;
 import com.fullerton.edu.cpsc.cpsc476.pojo.NewUserDetails;
 
 /**
@@ -22,13 +26,16 @@ public class UrlShortnerServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		ApplicationContext context = new ClassPathXmlApplicationContext("dataSources/users.xml");
+		JDBCNewUserDao dao = (JDBCNewUserDao) context.getBean("newUserDao");
 		HttpSession thisSession = request.getSession();
 		NewUserDetails userObject;
 		userObject = (NewUserDetails) thisSession.getAttribute("userInsession");
 		if (userObject == null) {
-			userObject = new NewUserDetails("GuestUser", "Guest@guest.com", "noPassword", true);
+			userObject = new NewUserDetails("GuestUser", "noPassword", true);
+			request.getSession().setAttribute("userInsession", userObject);
 		}
-		
+
 		String longUrl = request.getParameter("longUrl");
 		String shortUrl = "";
 		String pageName = request.getParameter("pageName");
@@ -38,19 +45,19 @@ public class UrlShortnerServlet extends HttpServlet {
 			ShowErrorPageUtil.redirectToErrorPage(request, response, pageName, ErrorAndMessages.URLNULLMESSAGE);
 			return;
 		}
-		/*for (String oneUrl : userObject.getUrlShornerMap().keySet()) {
-			if (oneUrl.equalsIgnoreCase(longUrl)) {
-				shortUrl = userObject.getUrlShornerMap().get(oneUrl);
-			}
-		}*/
+		shortUrl = dao.getShortUrl(longUrl);
 		if (shortUrl.equals("")) {
-			shortUrl = "http://" + request.getServerName() + ":" + request.getLocalPort() 
-					+ request.getContextPath() + "/" + "Short/" + new BigInteger(30, randomString).toString(32);
+			shortUrl = "http://" + request.getServerName() + ":" + request.getLocalPort() + request.getContextPath()
+					+ "/" + "Short/" + new BigInteger(30, randomString).toString(32);
+			if (!dao.insertLongAndShortURL(userObject.getUsername(),longUrl, shortUrl,0)) {
+				ShowErrorPageUtil.redirectToErrorPage(request, response, "welcome.jsp",
+						ErrorAndMessages.URLSHORTNERUNAVAILABLE);
+				return;
+			}
 		}
-		request.setAttribute("longUrl", longUrl);
-		request.setAttribute("shortUrl", shortUrl);
 		if (userObject.getIsGuestUser().equals(Boolean.FALSE)) {
-			//userObject.getUrlShornerMap().put(longUrl, shortUrl);
+			request.setAttribute("longUrl", longUrl);
+			request.setAttribute("shortUrl", shortUrl);
 			request.getRequestDispatcher("welcome.jsp").forward(request, response);
 		} else {
 			request.getRequestDispatcher("publicUrlShortner.jsp").forward(request, response);

@@ -13,10 +13,10 @@
 %>
 <%
 	String userName = "";
-	String userEmail = "";
 	String longUrl = (String)request.getAttribute("longUrl");
 	String shortUrl = (String)request.getAttribute("shortUrl");
 	String errorMessage = (String) request.getAttribute("errorMessage");
+	String infoMessages = (String) request.getAttribute("MessagesInfo");
 	
 	NewUserDetails thisUser = (NewUserDetails)session.getAttribute("userInsession");
 
@@ -26,7 +26,6 @@
 		return;
 	}else{
 		userName = thisUser.getUsername();
-		userEmail = thisUser.getEmailID();
 	}
 %>
 </head>
@@ -38,11 +37,16 @@
 	<%
 			}
 		%>
+	<%
+			if (infoMessages != null) {
+		%>
+	<h3 style="color: Green; text-align: center;"><%=infoMessages%></h3>
+	<%
+			}
+		%>
 
 	<h3>
 		Welcome ---->>>><%=userName %></h3>
-	<h3>
-		Your email is ----->>>><%=userEmail %></h3>
 
 	<div class="row col s4">
 		<form action="LogOut" method="post">
